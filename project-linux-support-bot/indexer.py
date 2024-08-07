@@ -21,22 +21,8 @@ def get_all_pages():
         data = response.json()
         for page in data['query']['allpages']:
             title = page['title']
-
-            # Check if the page is a redirect
-            page_info = requests.get(url, params={
-                "action": "query",
-                "titles": title,
-                "prop": "info",
-                "format": "json"
-            }).json()
-            page_data = next(iter(page_info['query']['pages'].values()))
-            # print("data: ", page_data)
-
-            # If the key is in the dictionary, the page is a redirect
-            if 'new' in page_data:
-                print(f"Page '{title}' is a redirect. Skipping.")
-            else:
-                print(f"Page '{title}' is not a redirect. Adding to the list.")
+            # Filter out non-English pages
+            if not re.search(r'\(.*\)$', title) and re.match(r'^[A-Za-z0-9\s\-_]+$', title):
                 pages.append(title)
         if 'continue' in data:
             params.update(data['continue'])
@@ -135,7 +121,7 @@ def main():
     all_pages = get_all_pages()  # Function to retrieve all English page titles
     print(f"Total pages: {len(all_pages)}")
 
-    for page_title in all_pages:
+    for page_title in tqdm(all_pages):
         content = get_page_content(page_title)  # Function to fetch page content
         if content:
             chunks = split_content_into_chunks(content)

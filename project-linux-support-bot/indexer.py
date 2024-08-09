@@ -2,6 +2,9 @@ import requests
 from elasticsearch import Elasticsearch
 from tqdm.auto import tqdm
 import re
+import psutil
+import threading
+import time
 
 # Get the list of all pages to parse
 import requests
@@ -111,7 +114,19 @@ def index_document(es, index, id, body):
     es.index(index=index, id=id, body=body)
 
 
+def monitor_resources():
+    process = psutil.Process()
+    while True:
+        cpu_usage = process.cpu_percent(interval=1)
+        memory_usage = process.memory_info().rss / (1024 * 1024)
+        print(f"CPU Usage: {cpu_usage}%, Memory Usage: {memory_usage} MB")
+        time.sleep(5)
+
+
 def main():
+    monitor_thread = threading.Thread(target=monitor_resources, daemon=True)
+    monitor_thread.start()
+
     es = Elasticsearch('http://localhost:9200')
     index_name = "archwiki"
 

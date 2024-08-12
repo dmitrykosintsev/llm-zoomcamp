@@ -1,7 +1,7 @@
 from nicegui import ui
+from rag import rag, llm
 
 dropdown_button = 'Select a model'
-result = 'Placeholder answer'
 
 
 def send_button_click():
@@ -11,7 +11,8 @@ def send_button_click():
         ui.notify('Empty prompt')
     else:
         ui.notify('Fetching the results...')
-        ui.label(result)
+        result = llm(prompt.value, drop.text)
+        ui.markdown(result)
         ui.label('Did you like the reply?') \
             .style('text-align: center;')
         with ui.button_group():
@@ -27,9 +28,10 @@ ui.label('This bot will help you set up your Arch distribution or fix existing i
 drop = ui.dropdown_button(dropdown_button, auto_close=True) \
     .style('display: block; margin-left: auto; margin-right: auto;')
 with drop:
-    ui.item('Llama3.1', on_click=lambda: drop.set_text('Llama3.1'))
-    ui.item('Qwen2', on_click=lambda: drop.set_text('Qwen2'))
-    ui.item('Zephyr', on_click=lambda: drop.set_text('Zephyr'))
+    ui.item('gemma2:2b', on_click=lambda: drop.set_text('gemma2:2b'))
+    ui.item('qwen2:1.5b', on_click=lambda: drop.set_text('qwen2:1.5b'))
+    ui.item('phi3', on_click=lambda: drop.set_text('phi3'))
+    ui.item('gpt-4o-mini', on_click=lambda: drop.set_text('gpt-4o-mini'))
 prompt = ui.input(label='Arch Linux bot ', placeholder='Type your question here') \
     .style('width: 40%; display: block; margin-left: auto; margin-right: auto;')
 ui.button('Send', on_click=lambda: send_button_click()) \

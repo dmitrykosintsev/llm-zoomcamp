@@ -10,8 +10,11 @@ from dotenv import load_dotenv
 # Load variables
 load_dotenv()
 
-ollama_client = OpenAI(base_url=os.getenv('OLLAMA_URL'), api_key="ollama")
-api_key = os.getenv('OPENAI_API_KEY')
+ollama_client = OpenAI(
+    base_url='http://localhost:11434/v1',
+    api_key="ollama",
+)
+OpenAI.api_key = os.getenv('OPENAI_API_KEY')
 openai_client = OpenAI()
 model = SentenceTransformer("multi-qa-MiniLM-L6-cos-v1")
 
@@ -60,12 +63,12 @@ def build_prompt(query, search_results):
 
 
 # Define a function to talk to LLM
-def llm(prompt, used_model = 'llama3.1'):
+def llm(prompt, used_model = 'gemma2:2b'):
     # Log the start time
     start_time = time.time()
 
     # Logic to choose the model
-    if used_model == 'llama3.1' or used_model == 'qwen2' or used_model == 'zephyr':
+    if used_model == 'gemma2:2b' or used_model == 'qwen2:1.5b' or used_model == 'phi3':
         response = ollama_client.chat.completions.create(
             model=used_model,
             messages=[{"role": "user", "content": prompt}]
@@ -87,17 +90,17 @@ def llm(prompt, used_model = 'llama3.1'):
 
 
 # Put everything together
-def rag(query):
+def rag(query, used_model='gemma2:2b'):
     vector = model.encode(query)
     search_results = elastic_search('question_text_vector', vector, "course")
     prompt = build_prompt(query, search_results)
-    answer = llm(prompt)
+    answer = llm(prompt, used_model)
     return answer
 
 
 def main():
-    query = "How do I install asusctl on Zephyrus G14?"
-    rag(query)
+    query = "How do I install asusctl on Arch?"
+    print(rag(query, 'phi3'))
 
 
 if __name__ == "__main__":

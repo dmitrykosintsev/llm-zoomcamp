@@ -1,6 +1,0 @@
-requests
-elasticsearch
-tqdm
-openai
-python-dotenv
-spacy
